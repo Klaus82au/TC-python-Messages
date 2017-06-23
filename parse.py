@@ -1,60 +1,56 @@
-import sys
-import os.path
+from sys import argv
+from os import path
 
-#global vars:
-
-#packetList - list of packets from da file
-packetList = []
 #addressants dict
-addrDict = {'Ivan': [], 'Dima': [], 'Ostap': [], 'Lesya': []}
+addressantsPackets = {'Ivan': [], 'Dima': [], 'Ostap': [], 'Lesya': []}
 
-#if i further implement thuis with a class,
-#  i won't need global vars(perhaps)
-
-def getInfile():
-    infileName = ""
-    if len(sys.argv) > 2:
-        print("only takes 1 argument")
-    infileName = sys.argv[1]
-    if not os.path.isfile(infileName):
+#checks if script is run properly with valid arguments
+def checkFileArgument():
+    if not len(argv)==2:
+        print("usage:\n" + argv[0] + " messagesfile")
+        exit(1)
+    infileName = argv[1]
+    if not path.isfile(infileName):
         print("file does not exist")
+        exit(1)
     return infileName
 
+#reads packets from file filename
 def readPackets(filename):
-    global packetList
-    packetList = []
     with open(filename) as f:
         packetList = f.readlines()
+    return packetList
 
-def processPackets(list):
-    global addrDict
-    for pack in list:
-        pack = pack.strip("\n") #should i put this back later?
+#distributes the packets between addressants
+def distributePackets(packetList):
+    global addressantsPackets
+    for pack in packetList:
+        pack = pack.rstrip("\n")
         boolvar = False
         if not pack:#it was just \n
             continue
         if len(pack) % 2 == 0:
             boolvar = True
-            addrDict['Ivan'].append(pack+'\n')
+            addressantsPackets['Ivan'].append(pack)
         if len(pack) % 2 == 1 and pack[0].isupper():
             boolvar = True
-            addrDict['Dima'].append(pack+'\n')
+            addressantsPackets['Dima'].append(pack)
         if pack.endswith(" end"):
             boolvar = True
-            addrDict['Lesya'].append(pack+'\n')
+            addressantsPackets['Lesya'].append(pack)
         if not boolvar:
-            addrDict['Ostap'].append(pack+'\n')
+            addressantsPackets['Ostap'].append(pack)
 
-
+#main is self explainatory
 def main(argv):
-    infileName = getInfile()
-    readPackets(infileName)
-    processPackets(packetList)
+    infileName = checkFileArgument()
+    packetList = readPackets(infileName)
+    distributePackets(packetList)
 
-    for addressant in addrDict:
+    for addressant in addressantsPackets:
         with open(addressant+".txt", "w") as f:
-                f.writelines(addrDict[addressant])
+                f.writelines('\n'.join(addressantsPackets[addressant]))
         f.close()
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main(argv)

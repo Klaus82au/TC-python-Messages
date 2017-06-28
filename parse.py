@@ -1,7 +1,8 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
+"""This reads \n terminated 'packets' from the input file and
+distributes them between 4 addressants"""
 from sys import argv
-from os import path
-#
+
 NUM_OF_ARGS = 2
 
 #checks if script is run properly with valid arguments

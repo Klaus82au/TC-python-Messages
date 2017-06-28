@@ -1,33 +1,31 @@
 from sys import argv
 from os import path
-
-#addressants dict
-addressantsPackets = {'Ivan': [], 'Dima': [], 'Ostap': [], 'Lesya': []}
+#
+NUM_OF_ARGS = 2
 
 #checks if script is run properly with valid arguments
-def checkFileArgument():
-    if not len(argv)==2:
+def checkArgument():
+    if not len(argv)==NUM_OF_ARGS:
         print("usage:\n" + argv[0] + " messagesfile")
         exit(1)
-    infileName = argv[1]
-    if not path.isfile(infileName):
-        print("file does not exist")
-        exit(1)
-    return infileName
+
 
 #reads packets from file filename
 def readPackets(filename):
-    with open(filename) as f:
-        packetList = f.readlines()
-    return packetList
+        try:
+            with open(filename) as f:
+                packetList = f.readlines()
+        except (OSError, IOError):
+            print("Could not open file!")
+            exit(1)
+        return packetList
 
 #distributes the packets between addressants
-def distributePackets(packetList):
-    global addressantsPackets
+def distributePackets(packetList, addressantsPackets):
     for pack in packetList:
         pack = pack.rstrip("\n")
         boolvar = False
-        if not pack:#it was just \n
+        if not pack:#it was just '\n' so skip
             continue
         if len(pack) % 2 == 0:
             boolvar = True
@@ -43,9 +41,10 @@ def distributePackets(packetList):
 
 #main is self explainatory
 def main(argv):
-    infileName = checkFileArgument()
-    packetList = readPackets(infileName)
-    distributePackets(packetList)
+    addressantsPackets = {'Ivan': [], 'Dima': [], 'Ostap': [], 'Lesya': []}
+    checkArgument()
+    packetList = readPackets(argv[1])
+    distributePackets(packetList, addressantsPackets)
 
     for addressant in addressantsPackets:
         with open(addressant+".txt", "w") as f:

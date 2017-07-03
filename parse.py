@@ -1,56 +1,70 @@
 #!/usr/bin/env python3
 """This reads \n terminated 'packets' from the input file and
-distributes them between 4 addressants"""
+distributes them between 4 receivers"""
 from sys import argv
 
 NUM_OF_ARGS = 2
+ENDWORD = " end"
+FILE_EXTENSION = ".txt"
 
-#checks if script is run properly with valid arguments
-def checkArgument():
-    if not len(argv)==NUM_OF_ARGS:
-        print("usage:\n" + argv[0] + " messagesfile")
+condition_dict = {'Ivan': lambda pack: len(pack) % 2 == 0,
+                  'Dima': lambda pack: pack[0].isupper(),
+                  'Lesya': lambda pack: pack.endswith(ENDWORD)}
+
+
+def check_argument():
+    """
+    checks if script is run properly with valid arguments
+    """
+    if not len(argv) == NUM_OF_ARGS:
+        print("usage:\n" + argv[0] + " inputfile")
         exit(1)
 
 
-#reads packets from file filename
-def readPackets(filename):
-        try:
-            with open(filename) as f:
-                packetList = f.readlines()
-        except (OSError, IOError):
-            print("Could not open file!")
-            exit(1)
-        return packetList
+def read_packets(filename):
+    """
+    reads packets from file
+    @arg1: filename
+    """
+    try:
+        with open(filename) as f:
+            packet_list = f.readlines()
+    except IOError:
+        print("Could not open file!")
+        exit(1)
+    return packet_list
 
-#distributes the packets between addressants
-def distributePackets(packetList, addressantsPackets):
-    for pack in packetList:
+
+def distribute_packets(packet_list, receivers_packets):
+    """
+    distributes the packets between receivers
+    @arg1: list of packets
+    @arg2: dictionary{receiver's name: list of packets}
+    """
+    for pack in packet_list:
         pack = pack.rstrip("\n")
-        boolvar = False
-        if not pack:#it was just '\n' so skip
+        if not pack:
+            # it was just '\n' so skip
             continue
-        if len(pack) % 2 == 0:
-            boolvar = True
-            addressantsPackets['Ivan'].append(pack)
-        if len(pack) % 2 == 1 and pack[0].isupper():
-            boolvar = True
-            addressantsPackets['Dima'].append(pack)
-        if pack.endswith(" end"):
-            boolvar = True
-            addressantsPackets['Lesya'].append(pack)
-        if not boolvar:
-            addressantsPackets['Ostap'].append(pack)
+        if condition_dict['Lesya'](pack):
+            receivers_packets['Lesya'].append(pack)
+        if condition_dict['Ivan'](pack):
+            receivers_packets['Ivan'].append(pack)
+        elif condition_dict['Dima'](pack):
+            receivers_packets['Dima'].append(pack)
+        elif not condition_dict['Lesya'](pack):
+            receivers_packets['Ostap'].append(pack)
 
-#main is self explainatory
+
 def main(argv):
-    addressantsPackets = {'Ivan': [], 'Dima': [], 'Ostap': [], 'Lesya': []}
-    checkArgument()
-    packetList = readPackets(argv[1])
-    distributePackets(packetList, addressantsPackets)
+    receivers_packets = {'Ivan': [], 'Dima': [], 'Ostap': [], 'Lesya': []}
+    check_argument()
+    packet_list = read_packets(argv[1])
+    distribute_packets(packet_list, receivers_packets)
 
-    for addressant in addressantsPackets:
-        with open(addressant+".txt", "w") as f:
-                f.writelines('\n'.join(addressantsPackets[addressant]))
+    for receiver in receivers_packets:
+        with open(receiver + FILE_EXTENSION, "w") as f:
+                f.writelines('\n'.join(receivers_packets[receiver]))
         f.close()
 
 if __name__ == '__main__':

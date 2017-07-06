@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """This reads \n terminated 'packets' from the input file and
 distributes them between 4 receivers"""
 from sys import argv
 import re
 import json
-
+import load
 
 NUM_OF_ARGS = 2
 ENDWORD = " end"
@@ -62,16 +62,17 @@ def distribute_packets(packet_list, receivers_packets):
 def main(argv):
     with open('addressants.json') as addressants_file:
         contacts = json.load(addressants_file)
-        print(contacts)
 
     receivers_packets = {'Ivan': [], 'Dima': [], 'Ostap': [], 'Lesya': []}
     check_argument()
-    packet_list = read_packets(argv[1])
+    packet_string = load.loadFile(argv[1])
+    print (packet_string)
+    """packet_list = read_packets(argv[1])
     distribute_packets(packet_list, receivers_packets)
 
     for receiver in receivers_packets:
         with open(receiver + FILE_EXTENSION, "w") as f:
-                f.writelines('\n'.join(receivers_packets[receiver]))
+                f.writelines('\n'.join(receivers_packets[receiver]))"""
 
 if __name__ == '__main__':
     main(argv)

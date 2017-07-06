@@ -1,5 +1,5 @@
 from distutils.core import setup, Extension
 
-foo_module = Extension('_read', sources=['read_wrap.c', 'read.c'])
+load_module = Extension('_load', sources=['load_wrap.c', 'load.c'])
 
-setup(name='read', ext_modules=[read_module], py_modules=["read"])
+setup(name='load', ext_modules=[load_module], py_modules=["load"])

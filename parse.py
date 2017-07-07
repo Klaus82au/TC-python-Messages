@@ -1,6 +1,8 @@
 #!/usr/bin/env python
-"""This reads \n terminated 'packets' from the input file and
-distributes them between 4 receivers"""
+"""Implementation of IDOL protocol
+This reads \n terminated 'packets' from the input file and
+distributes them between receivers, loaded from json file.
+make sure to run swig_magic.sh to get load lib"""
 from sys import argv
 import re
 import json
@@ -17,7 +19,7 @@ ENDWORD = "end"
 FILE_EXTENSION = ".txt"
 PORT = 1337
 DELAY = 0.5
-DEFAULT_TIMEOUT = 1
+SNIFF_TIMEOUT = 1
 PACK_PREVIEW_LEN = 15
 
 EVEN_LEN_RE = '^([^\n]{2})+$'
@@ -65,18 +67,6 @@ def check_argument():
         exit(1)
 
 
-class PingTimeout(Exception):
-    """
-    exception
-    host is not responding
-    """
-    def __init__(self, code):
-        self.code = code
-
-    def __str__(self):
-        return repr(self.code)
-
-
 class Receiver:
     """
     Contains all info about receiver(ip, name, packet_list)
@@ -110,7 +100,7 @@ class Receiver:
         """
         #sniff some packets for some time
         sniffed_packs = scapy.sniff(filter='udp and port {} and dst {}'.format(PORT, self.ip),
-                                    timeout=DEFAULT_TIMEOUT)
+                                    timeout=SNIFF_TIMEOUT)
         #check if we caught our pack
         for udp_packet in sniffed_packs:
             try:
@@ -143,7 +133,7 @@ class Receiver:
         ip_pack = scapy.IP(dst=self.ip)/scapy.UDP(sport=PORT, dport=PORT)/scapy.Raw(pack)
         #sending pack
         scapy.send(ip_pack, verbose=False)
-        #waiting for the thread to finish(it runs for DEFAULT_TIMEOUT seconds)
+        #waiting for the thread to finish(it runs for SNIFF_TIMEOUT seconds)
         thread.join()
 
 
